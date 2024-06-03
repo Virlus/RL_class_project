@@ -10,3 +10,10 @@ In this project, we are training an agent to learn from the offline datasets for
 
 - `dm_control==1.0.14`
 - `gym==0.21.0`
+
+
+## Running evaluation script with our pretrained checkpoint
+
+- `python agent_example.py`
+
+The total episode reward for walking task should be around 920, and around 315 for running task.
