@@ -1,5 +1,5 @@
 defaults:
-  - agent: dw_cds                          # cql_cds, cql_cdsz
+  - agent: ddr_cds                          # cql_cds, cql_cdsz
   # - override hydra/launcher: submitit_local
 
 # unsupervised exploration
