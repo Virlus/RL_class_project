@@ -160,10 +160,12 @@ class DIST_CDSAgent(Agent):
         with torch.no_grad():
             dist = self.actor(next_obs)
             sampled_next_action = dist.sample()  # (1024, act_dim)
+            next_action_log_prob = dist.log_prob(sampled_next_action) # (1024, )
+            alpha = self.log_actor_alpha.exp().detach()
             target_Q = self.critic_target(next_obs, sampled_next_action) # (1024, self.dist_dim)
             target_Q = F.softmax(target_Q, dim=-1)
             fixed_q_grid = self.q_grid.unsqueeze(0).repeat(target_Q.shape[0], 1)  # (1024, self.dist_dim)
-            target_q_grid = fixed_q_grid * discount + reward  # (1024, self.dist_dim)
+            target_q_grid = fixed_q_grid * discount + reward - alpha * next_action_log_prob.unsqueeze(-1).repeat(1, self.dist_dim) # (1024, self.dist_dim)
             target_q_grid = torch.clamp(target_q_grid, self.q_lower, self.q_upper)
             floor_indices = torch.floor((target_q_grid - self.q_lower) / (self.q_upper - self.q_lower) * (self.dist_dim - 1)).long()
             ceil_indices = torch.ceil((target_q_grid - self.q_lower) / (self.q_upper - self.q_lower) * (self.dist_dim - 1)).long()
@@ -247,7 +249,7 @@ class DIST_CDSAgent(Agent):
         policy = self.actor(obs)
         sampled_action = policy.rsample()              # (1024, 6)
         # print("sampled_action:", sampled_action.shape)
-        log_pi = policy.log_prob(sampled_action).sum(dim=-1)       # (1024, )
+        log_pi = policy.log_prob(sampled_action)       # (1024, )
 
         # update lagrange multiplier
         alpha_loss = -(self.log_actor_alpha.exp() * (log_pi + self.target_entropy).detach()).mean()
