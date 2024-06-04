@@ -12,6 +12,14 @@ In this project, we are training an agent to learn from the offline datasets for
 - `gym==0.21.0`
 
 
+## Agent specification
+
+- CDS: `cql_cds.py`
+- Ours without distributional Q-value: `dw_cds.py`
+- Ours without data reweighting: `dist_cds.py`
+- Ours: `ddr_cds.py`
+
+
 ## Running evaluation script with our pretrained checkpoint
 
 - `python agent_example.py`
