@@ -1,12 +1,12 @@
 defaults:
-  - agent: ddr_cds                          # cql_cds, cql_cdsz
+  - agent: dist_cds                          # cql_cds, cql_cdsz
   # - override hydra/launcher: submitit_local
 
 # unsupervised exploration
 # expl_agent: td3
 # task settings
-task: walker_run                  # main task to train (relable other datasets to this task)
-share_task: [walker_run, walker_walk]           # task for data sharing
+task: walker_walk                  # main task to train (relable other datasets to this task)
+share_task: [walker_walk, walker_run]           # task for data sharing
 data_type: [medium, medium-replay]              # dataset for data sharing (corresponding each share_task)
 
 discount: 0.99

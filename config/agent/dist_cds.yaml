@@ -16,9 +16,9 @@ target_cql_penalty: 5.0      # used if use_critic_lagrange is True
 
 use_tb: True
 hidden_dim: 256              # 1024
-dist_dim: 100
-q_upper: 200.
-q_lower: -200.
+dist_dim: 250
+q_upper: 500.
+q_lower: -500.
 #stddev_schedule: 0.2
 #stddev_clip: 0.3
 nstep: 1

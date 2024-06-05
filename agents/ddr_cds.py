@@ -448,15 +448,16 @@ class DDRCDSAgent(Agent):
         
         obs_m, action_m, reward_m, discount_m, next_obs_m, _ = utils.to_torch(batch_main, self.device)
         
-        # Predict weights
-        s_logits, sa_logits = self.discriminator(obs_m, action_m)
-        next_s_logits, _ = self.discriminator(next_obs_m, action_m)
-        clipped_s_logits = (s_logits / self.discriminator_weight_temp).clamp(-1. - self.discriminator_clip_ratio, 1. + self.discriminator_clip_ratio)
-        clipped_sa_logits = (sa_logits / self.discriminator_weight_temp).clamp(-1. - self.discriminator_clip_ratio, 1. + self.discriminator_clip_ratio)
-        normal_logits = F.softmax(torch.squeeze(clipped_s_logits + clipped_sa_logits, dim=-1), dim=0) # (1024, )
-        
-        # update discriminator
-        metrics.update(self.update_discriminator(reward_m, normal_logits, s_logits, sa_logits, next_s_logits, step))
+        if step % 5 == 0:
+            # Predict weights
+            s_logits, sa_logits = self.discriminator(obs_m, action_m)
+            next_s_logits, _ = self.discriminator(next_obs_m, action_m)
+            clipped_s_logits = (s_logits / self.discriminator_weight_temp).clamp(-1. - self.discriminator_clip_ratio, 1. + self.discriminator_clip_ratio)
+            clipped_sa_logits = (sa_logits / self.discriminator_weight_temp).clamp(-1. - self.discriminator_clip_ratio, 1. + self.discriminator_clip_ratio)
+            normal_logits = F.softmax(torch.squeeze(clipped_s_logits + clipped_sa_logits, dim=-1), dim=0) # (1024, )
+            
+            # update discriminator
+            metrics.update(self.update_discriminator(reward_m, normal_logits, s_logits, sa_logits, next_s_logits, step))
         
 
         # print("conservative data sharing...")   # obs.shape=(1024, 24), action.shape=(1024, 6) reward.shape=(1024, 1)
@@ -479,9 +480,6 @@ class DDRCDSAgent(Agent):
 
         # update actor
         metrics.update(self.update_actor(obs, action, step))
-        
-        # update discriminator
-        metrics.update(self.update_discriminator(reward, normal_logits, s_logits, sa_logits, next_s_logits, step))
 
         # update critic target
         utils.soft_update_params(self.critic, self.critic_target, self.critic_target_tau)
